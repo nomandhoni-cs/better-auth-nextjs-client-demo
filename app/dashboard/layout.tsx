@@ -6,7 +6,7 @@ import { Flower, LogOut, User, Home, Shield } from 'lucide-react'
 //
 import { Button } from '~/components/ui/button'
 import { authClient, useSession } from '~/lib/auth'
-import Topbar from '~/components/TopBar'
+import Topbar from '~/components/Topbar'
 
 export default function DashboardLayout({
   children,
