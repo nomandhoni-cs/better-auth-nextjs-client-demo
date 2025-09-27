@@ -42,7 +42,7 @@ export default function JwtDemoPage() {
             const session = await authClient.getSession();
             if (session?.data?.user) {
                 // Try to get JWT from session
-                const serverUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_SERVER_URL || "http://localhost:8787";
+                const serverUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
                 const res = await fetch(`${serverUrl}/api/auth/token`, {
                     method: "GET",
                     credentials: "include",
@@ -65,7 +65,7 @@ export default function JwtDemoPage() {
         setLoading(true);
         setResult("");
         try {
-            const serverUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_SERVER_URL || "http://localhost:8787";
+            const serverUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
             const res = await fetch(`${serverUrl}/api/auth/jwks`, { method: "GET" });
             if (!res.ok) throw new Error(await res.text());
             const data = (await res.json()) as Jwks;
@@ -85,7 +85,7 @@ export default function JwtDemoPage() {
             if (!token) throw new Error("No token. Click 'Get JWT' first.");
 
             // Call the protected route with JWT
-            const serverUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_SERVER_URL || "http://localhost:8787";
+            const serverUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
             const res = await fetch(`${serverUrl}/api/auth/protected`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
