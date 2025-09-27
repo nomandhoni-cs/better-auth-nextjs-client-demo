@@ -1,6 +1,7 @@
 // src/app/verify-email/page.tsx
 "use client";
 
+import { Suspense } from "react";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Mail, RefreshCw, CheckCircle, AlertCircle } from "lucide-react";
@@ -18,7 +19,7 @@ import { Label } from "~/components/ui/label";
 import { useSession, sendVerificationEmail, verifyEmail } from "~/lib/auth";
 import { toast } from "sonner";
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { data: session, isPending: sessionLoading, refetch } = useSession();
@@ -274,5 +275,20 @@ export default function VerifyEmailPage() {
                 </CardContent>
             </Card>
         </div>
+    );
+}
+
+// Main export with Suspense boundary
+export default function VerifyEmailPage() {
+    return (
+        <Suspense
+            fallback={
+                <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                    <Loader2 className="animate-spin h-8 w-8" />
+                </div>
+            }
+        >
+            <VerifyEmailContent />
+        </Suspense>
     );
 }
