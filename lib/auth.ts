@@ -4,4 +4,4 @@ export const authClient = createAuthClient({
   plugins: [],
 })
 
-export const { signIn, signUp, useSession, sendVerificationEmail, signOut } = authClient
+export const { signIn, signUp, useSession, sendVerificationEmail, signOut, verifyEmail } = authClient
