@@ -110,7 +110,10 @@ export function JWTClient() {
         setLoading(true);
         try {
             const serverUrl = process.env.NEXT_PUBLIC_API_URL;
-            const response = await fetch(`${serverUrl}/api/auth/token`);
+            const response = await fetch(`${serverUrl}/api/auth/token`, {
+                method: "GET",
+                credentials: "include",
+            });
             if (!response.ok) {
                 throw new Error("Failed to fetch JWKS");
             }
