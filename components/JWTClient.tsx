@@ -269,7 +269,7 @@ export function JWTClient() {
                                     <AlertCircle className="h-4 w-4" />
                                     <AlertTitle>No JWT Token</AlertTitle>
                                     <AlertDescription>
-                                        Click "Get JWT Token" to retrieve your authentication token
+                                        Click &quot;Get JWT Token&quot; to retrieve your authentication token
                                     </AlertDescription>
                                 </Alert>
                             )}
@@ -301,7 +301,7 @@ export function JWTClient() {
                                     <AlertCircle className="h-4 w-4" />
                                     <AlertTitle>No JWKS Data</AlertTitle>
                                     <AlertDescription>
-                                        Click "Fetch JWKS" to retrieve the public keys for verification
+                                        Click &quot;Fetch JWKS&quot; to retrieve the public keys for verification
                                     </AlertDescription>
                                 </Alert>
                             )}
@@ -349,7 +349,7 @@ export function JWTClient() {
                                     <AlertCircle className="h-4 w-4" />
                                     <AlertTitle>No Verification Result</AlertTitle>
                                     <AlertDescription>
-                                        Get both JWT and JWKS first, then click "Verify Token"
+                                        Get both JWT and JWKS first, then click &quot;Verify Token&quot;
                                     </AlertDescription>
                                 </Alert>
                             )}
