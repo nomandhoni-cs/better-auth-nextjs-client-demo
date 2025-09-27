@@ -1,6 +1,4 @@
 // utils/getSession.ts
-"use server";
-
 export async function getSessionUtil() {
     const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/auth/get-session", {
         method: "GET",

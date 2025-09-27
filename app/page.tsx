@@ -484,7 +484,7 @@ export default function SignIn(): JSX.Element {
 
             <div className="text-center text-sm">
               Don&apos;t have an account?{" "}
-              <Link href="/signup" className="underline">
+              <Link href="/auth/signup" className="underline">
                 Sign up
               </Link>
             </div>
