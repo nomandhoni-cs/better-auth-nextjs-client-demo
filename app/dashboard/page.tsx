@@ -13,6 +13,7 @@ import { User, Settings, Bell } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { useSession } from '~/lib/auth'
 import JwtDemoPage from '../jwt/page'
+import { JWTClient } from '~/components/JWTClient'
 
 export default function Dashboard() {
   const { data } = useSession()
@@ -143,6 +144,7 @@ export default function Dashboard() {
             </CardContent>
             </Card>
       </div> */}
+      <JWTClient />
       <JwtDemoPage />
     </>
   )
