@@ -138,10 +138,10 @@ export default function SignIn(): JSX.Element {
         router.refresh();
       }
 
-    } catch (err: any) {
+    } catch (err) {
       console.error("Login error:", err);
       if (!loginError) { // Only set if not already set by onError
-        setLoginError(err?.message || "Failed to sign in");
+        setLoginError("Failed to sign in");
       }
       setLoading(false);
     } finally {
@@ -166,9 +166,9 @@ export default function SignIn(): JSX.Element {
 
       toast.success("Verification email sent! Please check your inbox.");
       setResendCooldown(60); // 60 second cooldown
-    } catch (err: any) {
+    } catch (err) {
       console.error("Resend verification error:", err);
-      toast.error(err?.message || "Failed to send verification email");
+      toast.error("Failed to send verification email");
     } finally {
       setResendingVerification(false);
     }
@@ -262,9 +262,9 @@ export default function SignIn(): JSX.Element {
         provider,
         callbackURL: `${window.location.origin}${next}`,
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error(`${provider} sign-in error:`, err);
-      setLoginError(err?.message || `Failed to sign in with ${provider}`);
+      setLoginError(`Failed to sign in with ${provider}`);
       setLoading(false);
     }
   }
@@ -483,7 +483,7 @@ export default function SignIn(): JSX.Element {
             </div>
 
             <div className="text-center text-sm">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link href="/signup" className="underline">
                 Sign up
               </Link>
