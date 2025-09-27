@@ -12,6 +12,7 @@ import {
 import { User, Settings, Bell } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { useSession } from '~/lib/auth'
+import JwtDemoPage from '../jwt/page'
 
 export default function Dashboard() {
   const { data } = useSession()
@@ -61,19 +62,19 @@ export default function Dashboard() {
                 <span className='font-medium'>Member since:</span>{' '}
                 {/* {user?.createdAt} */}
               </p>
-              <Link href='/dashboard/profile' className='w-full block'>
+              {/* <Link href='/dashboard/profile' className='w-full block'>
                 <Button
                   variant='outline'
                   className='mt-4 w-full border-indigo-200 text-indigo-700 hover:bg-indigo-50'
                 >
                   View Profile
                 </Button>
-              </Link>
+              </Link> */}
             </div>
           </CardContent>
         </Card>
-
-        <Card className='border-indigo-200'>
+        <JwtDemoPage />
+        {/* <Card className='border-indigo-200'>
           <CardHeader>
             <CardTitle className='text-indigo-700 flex items-center'>
               <Settings className='mr-2 h-5 w-5' />
@@ -141,7 +142,7 @@ export default function Dashboard() {
               </Button>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </>
   )
