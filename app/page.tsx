@@ -1,187 +1,496 @@
-'use client'
+// src/app/login/page.tsx
+"use client";
+import { useState, type JSX, type FormEvent, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Loader2, AlertTriangle, Mail } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+// import { Checkbox } from "~/components/ui/checkbox";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { authClient, useSession, sendVerificationEmail } from "~/lib/auth";
+import { toast } from "sonner";
 
-import React from 'react'
-import Link from 'next/link'
-import { Button } from '~/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card'
-import { authClient, useSession } from '~/lib/auth'
-import { Flower, Github, Loader2 } from 'lucide-react'
-import { Separator } from '~/components/ui/separator'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
+export default function SignIn(): JSX.Element {
+  const router = useRouter();
+  const { data: session, isPending: sessionLoading, refetch: refetchSession } = useSession();
 
-export default function Home() {
-  const [isGithubLoading, setIsGithubLoading] = React.useState(false)
-  const [isGoogleLoading, setIsGoogleLoading] = React.useState(false)
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [twoFARequired, setTwoFARequired] = useState<boolean>(false);
+  const [twoFACode, setTwoFACode] = useState<string>("");
+  const [useBackup, setUseBackup] = useState<boolean>(false);
+  const [trustDevice, setTrustDevice] = useState<boolean>(true);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [twoFAError, setTwoFAError] = useState<string | null>(null);
+  const [passkeyAutoFillAvailable, setPasskeyAutoFillAvailable] = useState(false);
+  const [emailVerificationRequired, setEmailVerificationRequired] = useState(false);
+  const [resendingVerification, setResendingVerification] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
-  const { data: session } = useSession()
+  const next = "/dashboard";
 
-  const handleGithubLogin = async () => {
-    setIsGithubLoading(true)
-    await authClient.signIn.social(
-      {
-        provider: 'github',
-        callbackURL: window.location.origin,
-      },
-      {
-        onError: ({ error }) => {
-          console.log(error)
-          toast.error('GitHub login failed', {
-            description: 'Could not authenticate with GitHub.',
-          })
+  // Handle cooldown timer
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
-          setIsGithubLoading(false)
-        },
+  // Redirect if already logged in
+  useEffect(() => {
+    if (session?.user && !sessionLoading && !loading) {
+      // Check if email is verified
+      if (!session.user.emailVerified) {
+        router.replace("/verify-email");
+      } else {
+        router.replace(next);
       }
-    )
+    }
+  }, [session, sessionLoading, loading, router, next]);
+
+  // // Check passkey support
+  // useEffect(() => {
+  //   if (!session?.user && !sessionLoading) {
+  //     checkPasskeySupport();
+  //   }
+  // }, [session, sessionLoading]);
+
+  // const checkPasskeySupport = async () => {
+  //   try {
+  //     if (
+  //       window.PublicKeyCredential &&
+  //       PublicKeyCredential.isConditionalMediationAvailable
+  //     ) {
+  //       const available = await PublicKeyCredential.isConditionalMediationAvailable();
+  //       setPasskeyAutoFillAvailable(available);
+
+  //       if (available && !session?.user) {
+  //         try {
+  //           await authClient.signIn.passkey({
+  //             autoFill: true,
+  //           });
+  //         } catch (error) {
+  //           console.debug("Passkey autofill check:", error);
+  //         }
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.debug("WebAuthn not supported:", error);
+  //   }
+  // };
+
+  async function handleLogin(e?: FormEvent<HTMLFormElement>): Promise<void> {
+    e?.preventDefault();
+    setLoginError(null);
+    setTwoFAError(null);
+    setEmailVerificationRequired(false);
+    setLoading(true);
+
+    try {
+      const response = await authClient.signIn.email(
+        {
+          email,
+          password,
+        },
+        {
+          onError: (ctx) => {
+            // Handle email verification required error
+            if (ctx.error.status === 403) {
+              setEmailVerificationRequired(true);
+              setLoginError("Please verify your email address before signing in.");
+            } else {
+              setLoginError(ctx.error.message || "Login failed");
+            }
+          }
+        }
+      );
+
+      console.log("Login response:", response);
+
+      // Check if 2FA is required
+      if (response?.data && "twoFactorRedirect" in response.data && response.data.twoFactorRedirect === true) {
+        console.log("2FA is required");
+        setTwoFARequired(true);
+        setLoading(false);
+        return;
+      }
+
+      // Check for errors
+      if (response?.error) {
+        // Error already handled in onError callback
+        setLoading(false);
+        return;
+      }
+
+      // Successful login
+      if (response?.data?.user) {
+        // Check if email is verified
+        if (!response.data.user.emailVerified) {
+          router.replace("/verify-email");
+        } else {
+          router.replace(next);
+        }
+        router.refresh();
+      }
+
+    } catch (err: any) {
+      console.error("Login error:", err);
+      if (!loginError) { // Only set if not already set by onError
+        setLoginError(err?.message || "Failed to sign in");
+      }
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  const handleGoogleLogin = async () => {
-    setIsGoogleLoading(true)
-    await authClient.signIn.social(
-      {
-        provider: 'google',
-        callbackURL: window.location.origin,
-      },
-      {
-        onError: ({ error }) => {
-          console.log(error)
-          toast.error('Google login failed', {
-            description: 'Could not authenticate with Google.',
-          })
+  async function handleResendVerification() {
+    if (!email) {
+      toast.error("Please enter your email address");
+      return;
+    }
 
-          setIsGoogleLoading(false)
-        },
-      }
-    )
+    setResendingVerification(true);
+    setLoginError(null);
+
+    try {
+      await sendVerificationEmail({
+        email,
+        callbackURL: next,
+      });
+
+      toast.success("Verification email sent! Please check your inbox.");
+      setResendCooldown(60); // 60 second cooldown
+    } catch (err: any) {
+      console.error("Resend verification error:", err);
+      toast.error(err?.message || "Failed to send verification email");
+    } finally {
+      setResendingVerification(false);
+    }
+  }
+
+  // async function handleVerify2FA(e?: FormEvent<HTMLFormElement>): Promise<void> {
+  //   e?.preventDefault();
+  //   setTwoFAError(null);
+  //   setLoading(true);
+
+  //   try {
+  //     let response;
+
+  //     if (useBackup) {
+  //       response = await authClient.twoFactor.verifyBackupCode({
+  //         code: twoFACode,
+  //         trustDevice
+  //       });
+  //     } else {
+  //       response = await authClient.twoFactor.verifyTotp({
+  //         code: twoFACode,
+  //         trustDevice
+  //       });
+  //     }
+
+  //     if (response?.error) {
+  //       setTwoFAError(response.error.message || "Invalid code");
+  //       setLoading(false);
+  //       return;
+  //     }
+
+  //     if (response?.data) {
+  //       router.replace(next);
+  //       router.refresh();
+  //     }
+  //   } catch (err: any) {
+  //     setTwoFAError(err?.message || "Invalid code. Try again.");
+  //     setLoading(false);
+  //   }
+  // }
+
+  // async function handlePasskeySignIn() {
+  //   setLoginError(null);
+  //   setLoading(true);
+
+  //   try {
+  //     const response = await authClient.signIn.passkey({
+  //       ...(email && { email }),
+  //     });
+
+  //     if (response?.error) {
+  //       const errorMessage = response.error.message || "Passkey authentication failed";
+  //       if (!errorMessage.toLowerCase().includes("cancel") &&
+  //         !errorMessage.toLowerCase().includes("abort")) {
+  //         setLoginError(errorMessage);
+  //       }
+  //       setLoading(false);
+  //       return;
+  //     }
+
+  //     if (response?.data?.user || response?.data?.session) {
+  //       setLoading(false);
+
+  //       // Check if email is verified
+  //       if (response.data.user && !response.data.user.emailVerified) {
+  //         router.replace("/verify-email");
+  //       } else {
+  //         router.replace(next);
+  //       }
+  //     } else {
+  //       console.log("Unexpected response format:", response);
+  //       setLoginError("Authentication successful but unexpected response format");
+  //       setLoading(false);
+  //     }
+  //   } catch (err: any) {
+  //     const errorMessage = err?.message || "Passkey authentication failed";
+  //     if (!errorMessage.toLowerCase().includes("cancel") &&
+  //       !errorMessage.toLowerCase().includes("abort")) {
+  //       setLoginError(errorMessage);
+  //     }
+  //     setLoading(false);
+  //   }
+  // }
+
+  async function handleSocialSignIn(provider: "google" | "github") {
+    setLoginError(null);
+    setLoading(true);
+
+    try {
+      await authClient.signIn.social({
+        provider,
+        callbackURL: `${window.location.origin}${next}`,
+      });
+    } catch (err: any) {
+      console.error(`${provider} sign-in error:`, err);
+      setLoginError(err?.message || `Failed to sign in with ${provider}`);
+      setLoading(false);
+    }
+  }
+
+  if (sessionLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loader2 className="animate-spin h-8 w-8" />
+      </div>
+    );
+  }
+
+  if (session?.user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="animate-spin h-8 w-8 mx-auto mb-4" />
+          <p>Redirecting...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-b from-indigo-50 to-white flex flex-col items-center justify-center p-4'>
-      <Card className='w-full max-w-md border-indigo-200'>
-        <CardHeader className='text-center'>
-          <div className='mx-auto bg-indigo-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-2'>
-            <Flower className='h-6 w-6 text-indigo-500' />
-          </div>
-          <CardTitle className='text-2xl font-bold text-indigo-700'>
-            Better Auth
-          </CardTitle>
-          <CardDescription>
-            Secure authentication with a beautiful interface
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="max-w-md w-96">
+        <CardHeader>
+          <CardTitle className="text-lg md:text-xl">Sign In</CardTitle>
+          <CardDescription className="text-xs md:text-sm">
+            Enter your email below to login to your account
           </CardDescription>
         </CardHeader>
-        <CardContent className='space-y-4'>
-          <p className='text-center text-muted-foreground'>
-            Welcome to Better Auth, a simple and secure authentication system
-            with a modern interface.
-          </p>
-          <div className='grid gap-4'>
-            {session ? (
-              <>
-                <Link href='/dashboard' className='w-full'>
-                  <Button className='w-full bg-indigo-600 hover:bg-indigo-700'>
-                    Dashboard
-                  </Button>
-                </Link>
-                <Button
-                  variant='outline'
-                  className='w-full border-indigo-200 text-indigo-700 hover:bg-indigo-50'
-                  onClick={() => authClient.signOut()}
-                >
-                  Logout
-                </Button>
-              </>
-            ) : (
-              <>
-                <div className='grid grid-cols-2 gap-4'>
-                  <Button
-                    variant='outline'
-                    className='border-indigo-200'
-                    onClick={handleGithubLogin}
-                    disabled={isGithubLoading}
-                  >
-                    {isGithubLoading ? (
-                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    ) : (
-                      <Github className='mr-2 h-4 w-4' />
-                    )}
-                    GitHub
-                  </Button>
-                  <Button
-                    variant='outline'
-                    type='button'
-                    className='border-indigo-200'
-                    onClick={handleGoogleLogin}
-                    disabled={isGoogleLoading}
-                  >
-                    {isGoogleLoading ? (
-                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    ) : (
-                      <svg className='mr-2 h-4 w-4' viewBox='0 0 24 24'>
-                        <path
-                          d='M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z'
-                          fill='#4285F4'
-                        />
-                        <path
-                          d='M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z'
-                          fill='#34A853'
-                        />
-                        <path
-                          d='M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z'
-                          fill='#FBBC05'
-                        />
-                        <path
-                          d='M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z'
-                          fill='#EA4335'
-                        />
-                        <path d='M1 1h22v22H1z' fill='none' />
-                      </svg>
-                    )}
-                    Google
-                  </Button>
-                </div>
-                <div className='relative'>
-                  <div className='absolute inset-0 flex items-center'>
-                    <Separator className='w-full' />
-                  </div>
-                  <div className='relative flex justify-center text-xs uppercase'>
-                    <span className='bg-white px-2 text-muted-foreground'>
-                      Or continue with
-                    </span>
-                  </div>
-                </div>
-                <div className='flex flex-col space-y-2'>
-                  <Link href='/auth/login' className='w-full'>
-                    <Button className='w-full bg-indigo-600 hover:bg-indigo-700'>
-                      Login with Email
-                    </Button>
-                  </Link>
-                  <Link href='/auth/register' className='w-full'>
-                    <Button
-                      variant='outline'
-                      className='w-full border-indigo-200 text-indigo-700 hover:bg-indigo-50'
-                    >
-                      Register
-                    </Button>
-                  </Link>
-                </div>
-              </>
+        <CardContent>
+          <div className="grid gap-4">
+            {loginError && (
+              <Alert variant="destructive" aria-live="polite">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Sign-in failed</AlertTitle>
+                <AlertDescription>{loginError}</AlertDescription>
+              </Alert>
             )}
+
+            {emailVerificationRequired && (
+              <Alert className="border-orange-200 bg-orange-50">
+                <Mail className="h-4 w-4 text-orange-600" />
+                <AlertTitle className="text-orange-800">Email Verification Required</AlertTitle>
+                <AlertDescription className="text-orange-700">
+                  Your email address needs to be verified before you can sign in.
+                  <Button
+                    variant="link"
+                    className="h-auto p-0 ml-1 text-orange-700 underline"
+                    onClick={handleResendVerification}
+                    disabled={resendingVerification || resendCooldown > 0}
+                  >
+                    {resendingVerification ? "Sending..." :
+                      resendCooldown > 0 ? `Resend in ${resendCooldown}s` :
+                        "Resend verification email"}
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <form className="grid gap-4" onSubmit={handleLogin} noValidate>
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  name="email"
+                  autoComplete={passkeyAutoFillAvailable ? "username webauthn" : "username"}
+                  placeholder="m@example.com"
+                  required
+                  onChange={(e) => setEmail(e.target.value)}
+                  value={email}
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="password">Password</Label>
+                  <Link href="/forgot-password" className="ml-auto inline-block text-sm underline">
+                    Forgot your password?
+                  </Link>
+                </div>
+
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="password"
+                  autoComplete={passkeyAutoFillAvailable ? "current-password webauthn" : "current-password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+
+              <Button type="submit" className="w-full" disabled={loading || !email || !password}>
+                {loading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin mr-2" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
+              </Button>
+            </form>
+
+            {/* 2FA Verification */}
+            {twoFARequired && (
+              <div className="grid gap-2 border rounded-md p-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="twofa">
+                    {useBackup ? "Backup code" : "Authenticator code"}
+                  </Label>
+                  <button
+                    type="button"
+                    className="text-xs underline"
+                    onClick={() => {
+                      setUseBackup((v) => !v);
+                      setTwoFACode("");
+                      setTwoFAError(null);
+                    }}
+                  >
+                    {useBackup ? "Use authenticator code" : "Use backup code"}
+                  </button>
+                </div>
+
+                {twoFAError && (
+                  <Alert variant="destructive" aria-live="polite">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Verification failed</AlertTitle>
+                    <AlertDescription>{twoFAError}</AlertDescription>
+                  </Alert>
+                )}
+                {/* 
+                <form className="grid gap-2" onSubmit={handleVerify2FA} noValidate>
+                  <Input
+                    id="twofa"
+                    inputMode={useBackup ? "text" : "numeric"}
+                    autoComplete="one-time-code"
+                    placeholder={useBackup ? "Enter backup code" : "123456"}
+                    value={twoFACode}
+                    onChange={(e) => setTwoFACode(e.target.value)}
+                    autoFocus
+                    disabled={loading}
+                  />
+
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="trust"
+                      checked={trustDevice}
+                      onCheckedChange={(v: boolean | "indeterminate") => setTrustDevice(v === true)}
+                    />
+                    <Label htmlFor="trust">Trust this device</Label>
+                  </div>
+
+                  <Button className="w-full" type="submit" disabled={loading || !twoFACode}>
+                    {loading ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin mr-2" />
+                        Verifying...
+                      </>
+                    ) : (
+                      "Verify"
+                    )}
+                  </Button>
+                </form> */}
+              </div>
+            )}
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            {/* <Button
+              type="button"
+              variant="secondary"
+              disabled={loading}
+              className="gap-2"
+              onClick={handlePasskeySignIn}
+            >
+              <Key size={16} />
+              Sign in with Passkey
+            </Button> */}
+
+            <div className="w-full gap-2 flex flex-col">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full gap-2"
+                disabled={loading}
+                onClick={() => handleSocialSignIn("google")}
+              >
+                Sign in with Google
+              </Button>
+
+              {/* <Button
+                type="button"
+                variant="outline"
+                className="w-full gap-2"
+                disabled={loading}
+                onClick={() => handleSocialSignIn("github")}
+              >
+                Sign in with GitHub
+              </Button> */}
+            </div>
+
+            <div className="text-center text-sm">
+              Don't have an account?{" "}
+              <Link href="/signup" className="underline">
+                Sign up
+              </Link>
+            </div>
           </div>
         </CardContent>
-        <CardFooter className='flex justify-center border-t border-indigo-100 pt-4'>
-          <p className='text-xs text-muted-foreground'>
-            &copy; {new Date().getFullYear()} Better Auth Demo
-          </p>
-        </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
