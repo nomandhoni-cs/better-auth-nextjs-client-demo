@@ -87,16 +87,16 @@ export default function Topbar() {
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => router.push("/login")}
-                                    className={pathname === "/login" ? "bg-gray-100" : ""}
+                                    onClick={() => router.push("/auth/login")}
+                                    className={pathname === "/auth/login" ? "bg-gray-100" : ""}
                                 >
                                     Login
                                 </Button>
                                 <Button
                                     variant="default"
                                     size="sm"
-                                    onClick={() => router.push("/signup")}
-                                    className={pathname === "/signup" ? "opacity-90" : ""}
+                                    onClick={() => router.push("/auth/signup")}
+                                    className={pathname === "/auth/signup" ? "opacity-90" : ""}
                                 >
                                     Sign Up
                                 </Button>

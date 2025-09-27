@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '~/components/ui/button'
 import {
@@ -12,18 +11,18 @@ import {
 } from '~/components/ui/card'
 import { User, Settings, Bell } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
+import { useSession } from '~/lib/auth'
 
 export default function Dashboard() {
-  const [user] = useState({
-    name: 'Jane Doe',
-    email: 'jane@example.com',
-    joinedDate: 'March 2023',
-  })
+  const { data } = useSession()
+
+  const user = data?.user
+  console.log(data, "session data")
 
   return (
     <>
       <h1 className='text-2xl font-bold text-gray-800 mb-6'>
-        Welcome back, {user.name}!
+        Welcome back, {data?.user.name}!
       </h1>
 
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
@@ -40,10 +39,10 @@ export default function Dashboard() {
               <Avatar className='h-20 w-20 mb-2'>
                 <AvatarImage
                   src='/placeholder.svg?height=80&width=80'
-                  alt={user.name}
+                  alt={user?.name}
                 />
                 <AvatarFallback className='bg-indigo-100 text-indigo-700 text-xl'>
-                  {user.name
+                  {user?.name
                     .split(' ')
                     .map((n) => n[0])
                     .join('')
@@ -53,14 +52,14 @@ export default function Dashboard() {
             </div>
             <div className='space-y-2'>
               <p className='text-sm text-gray-600'>
-                <span className='font-medium'>Name:</span> {user.name}
+                <span className='font-medium'>Name:</span> {user?.name}
               </p>
               <p className='text-sm text-gray-600'>
-                <span className='font-medium'>Email:</span> {user.email}
+                <span className='font-medium'>Email:</span> {user?.email}
               </p>
               <p className='text-sm text-gray-600'>
                 <span className='font-medium'>Member since:</span>{' '}
-                {user.joinedDate}
+                {/* {user?.createdAt} */}
               </p>
               <Link href='/dashboard/profile' className='w-full block'>
                 <Button
