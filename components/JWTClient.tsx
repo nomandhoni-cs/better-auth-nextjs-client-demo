@@ -109,7 +109,8 @@ export function JWTClient() {
     const fetchJWKS = async () => {
         setLoading(true);
         try {
-            const response = await fetch("/api/auth/jwks");
+            const serverUrl = process.env.NEXT_PUBLIC_API_URL;
+            const response = await fetch(`${serverUrl}/api/auth/token`);
             if (!response.ok) {
                 throw new Error("Failed to fetch JWKS");
             }
@@ -359,7 +360,7 @@ export function JWTClient() {
             </Card>
 
             {/* Usage Example Card */}
-            <Card>
+            {/* <Card>
                 <CardHeader>
                     <CardTitle>Usage Example</CardTitle>
                     <CardDescription>
@@ -394,7 +395,7 @@ if (data) {
 // Use jose or similar library for verification`}
                     </pre>
                 </CardContent>
-            </Card>
+            </Card> */}
         </div>
     );
 }
