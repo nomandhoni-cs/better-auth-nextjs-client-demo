@@ -45,11 +45,9 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
-import { getSessionUtil } from "./lib/getSession";
 
 export async function middleware(request: NextRequest) {
-  const sessionUtil = await getSessionUtil()
-  console.log("the session util", sessionUtil)
+
 
   const sessionCookie = getSessionCookie(request);
   console.log(sessionCookie, "sessionCookie")
