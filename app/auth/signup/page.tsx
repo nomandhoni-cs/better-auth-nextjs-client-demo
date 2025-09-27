@@ -182,7 +182,7 @@ export default function SignUp() {
               <Mail className="h-12 w-12 text-primary mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-2">Check Your Email!</h2>
               <p className="text-gray-600 mb-4">
-                We've sent a verification link to <strong>{email}</strong>
+                We&apos;ve sent a verification link to <strong>{email}</strong>
               </p>
               <p className="text-sm text-gray-500">
                 Redirecting to verification page...
