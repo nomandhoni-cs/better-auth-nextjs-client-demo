@@ -2,7 +2,6 @@ import { headers } from "next/headers";
 
 export default async function PrivateLayout() {
     const incomingHeaders = await headers(); // Add await here
-    console.log(incomingHeaders, "all incoming header")
     const cookie = incomingHeaders.get("cookie");
 
     const res = await fetch("https://auth0.peermed.de/api/auth/get-session", {
@@ -14,9 +13,6 @@ export default async function PrivateLayout() {
     let sessionData
     try {
         sessionData = await res.json();
-        console.log(
-            "The session from session info"
-        )
     } catch {
         // ignore parse errors, session stays null
     }
