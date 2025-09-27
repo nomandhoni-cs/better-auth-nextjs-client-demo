@@ -1,4 +1,4 @@
-
+"use client"
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { usePathname } from 'next/navigation'
