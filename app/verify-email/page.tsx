@@ -172,7 +172,7 @@ export default function VerifyEmailPage() {
                     </div>
                     <CardTitle className="text-center">Verify Your Email</CardTitle>
                     <CardDescription className="text-center">
-                        We've sent a verification email to{" "}
+                        We&apos;ve sent a verification email to{" "}
                         <span className="font-medium">{session.user.email}</span>
                     </CardDescription>
                 </CardHeader>
@@ -227,7 +227,7 @@ export default function VerifyEmailPage() {
 
                     <div className="text-center space-y-2">
                         <p className="text-sm text-gray-600">
-                            Didn't receive the email? Check your spam folder or
+                            Didn&apos;t receive the email? Check your spam folder or
                         </p>
                         <Button
                             variant="outline"
