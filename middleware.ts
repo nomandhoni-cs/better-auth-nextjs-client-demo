@@ -1,43 +1,64 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+// import { NextResponse } from 'next/server'
+// import type { NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
-  // Get current path
-  const path = request.nextUrl.pathname
+// export function middleware(request: NextRequest) {
 
-  // Define public paths that don't require authentication
-  const isPublicPath =
-    path === '/auth/login' ||
-    path === '/auth/register' ||
-    path === '/auth/forgot-password' ||
-    path === '/auth/reset-password' ||
-    path.startsWith('/auth/reset-password/') ||
-    path === '/'
+//   // Get current path
+//   const path = request.nextUrl.pathname
 
-  // Get authentication status from cookies - better-auth uses '__session' cookie
-  const hasSession = request.cookies.has('better-auth.session_token')
-  console.log(hasSession, 'hasSession')
+//   // Define public paths that don't require authentication
+//   const isPublicPath =
+//     path === '/auth/login' ||
+//     path === '/auth/register' ||
+//     path === '/auth/forgot-password' ||
+//     path === '/auth/reset-password' ||
+//     path.startsWith('/auth/reset-password/') ||
+//     path === '/'
 
-  // Redirect authenticated users away from auth pages
-  if (isPublicPath && hasSession) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
+//   // Get authentication status from cookies - better-auth uses '__session' cookie
+//   const hasSession = request.cookies.has('better-auth.session_token')
+//   console.log(hasSession, 'hasSession')
 
-  // Redirect unauthenticated users to login
-  if (!isPublicPath && !hasSession) {
-    // Store the original path to redirect back after login
-    const redirectUrl = new URL('/auth/login', request.url)
-    redirectUrl.searchParams.set('callbackUrl', path)
-    return NextResponse.redirect(redirectUrl)
-  }
+//   // Redirect authenticated users away from auth pages
+//   if (isPublicPath && hasSession) {
+//     return NextResponse.redirect(new URL('/dashboard', request.url))
+//   }
+
+//   // Redirect unauthenticated users to login
+//   if (!isPublicPath && !hasSession) {
+//     // Store the original path to redirect back after login
+//     const redirectUrl = new URL('/auth/login', request.url)
+//     redirectUrl.searchParams.set('callbackUrl', path)
+//     return NextResponse.redirect(redirectUrl)
+//   }
+// }
+
+// export const config = {
+//   // Define which paths should be handled by this middleware
+//   matcher: [
+//     // Match all paths that require authentication
+//     '/dashboard/:path*',
+//     // Match authentication pages
+//     '/auth/:path*',
+//   ],
+// }
+
+import { NextRequest, NextResponse } from "next/server";
+import { getSessionCookie } from "better-auth/cookies";
+
+export async function middleware(request: NextRequest) {
+  const sessionCookie = getSessionCookie(request);
+  console.log(sessionCookie, "sessionCookie")
+  // THIS IS NOT SECURE!
+  // This is the recommended approach to optimistically redirect users
+  // We recommend handling auth checks in each page/route
+  // if (!sessionCookie) {
+  //   return NextResponse.redirect(new URL("/", request.url));
+  // }
+
+  return NextResponse.next();
 }
 
 export const config = {
-  // Define which paths should be handled by this middleware
-  matcher: [
-    // Match all paths that require authentication
-    '/dashboard/:path*',
-    // Match authentication pages
-    '/auth/:path*',
-  ],
-}
+  matcher: ["/dashboard"], // Specify the routes the middleware applies to
+};
