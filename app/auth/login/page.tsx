@@ -42,7 +42,7 @@ type MagicLinkFormValues = {
 function LoginForm() {
   const [isGithubLoading, setIsGithubLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
-  const [isMagicLinkSent, setIsMagicLinkSent] = useState(false)
+
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -64,7 +64,6 @@ function LoginForm() {
   })
 
   const { isSubmitting } = form.formState
-  const { isSubmitting: isMagicLinkSubmitting } = magicLinkForm.formState
 
   const onSubmit = async (data: FormValues) => {
     // Sign in with email and password

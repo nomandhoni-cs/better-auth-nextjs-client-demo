@@ -38,14 +38,9 @@ type FormValues = {
   terms: boolean
 }
 
-type MagicLinkFormValues = {
-  email: string
-  terms: boolean
-}
 
 function RegisterForm() {
   const router = useRouter()
-  const [isMagicLinkSent, setIsMagicLinkSent] = useState(false)
   const [isGithubLoading, setIsGithubLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 

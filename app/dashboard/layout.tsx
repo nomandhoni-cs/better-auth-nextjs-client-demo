@@ -1,13 +1,10 @@
-'use client'
 
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { usePathname, useRouter } from 'next/navigation'
-import { Flower, LogOut, User, Home, Shield, Users } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { Flower, LogOut, User, Home, Shield } from 'lucide-react'
 //
 import { Button } from '~/components/ui/button'
-import { Badge } from '~/components/ui/badge'
 import { authClient, useSession } from '~/lib/auth'
 
 export default function DashboardLayout({
@@ -15,18 +12,10 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const router = useRouter()
   const pathname = usePathname()
-  const [isAdmin, setIsAdmin] = useState(false)
 
   const { data } = useSession()
-
-  // Check user role on component mount
-  useEffect(() => {
-    if (data?.user?.isAdmin) {
-      setIsAdmin(true)
-    }
-  }, [data])
+  console.log(data, "session data")
 
   const handleLogout = async () => {
     await authClient.signOut({
@@ -45,12 +34,6 @@ export default function DashboardLayout({
     { href: '/dashboard', label: 'Dashboard', icon: Home },
     { href: '/dashboard/profile', label: 'Profile', icon: User },
     { href: '/dashboard/change-password', label: 'Security', icon: Shield },
-  ]
-
-  // Admin-only navigation items
-  const adminNavItems = [
-    { href: '/dashboard/users', label: 'Users', icon: Users },
-    // Add more admin pages as needed
   ]
 
   const isActive = (path: string) => {
@@ -75,11 +58,10 @@ export default function DashboardLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center space-x-1 relative ${
-                  isActive(item.href)
-                    ? 'text-indigo-700 font-medium'
-                    : 'text-gray-600 hover:text-indigo-600'
-                }`}
+                className={`flex items-center space-x-1 relative ${isActive(item.href)
+                  ? 'text-indigo-700 font-medium'
+                  : 'text-gray-600 hover:text-indigo-600'
+                  }`}
               >
                 <item.icon className='h-4 w-4' />
                 <span>{item.label}</span>
@@ -89,32 +71,6 @@ export default function DashboardLayout({
               </Link>
             ))}
 
-            {/* Admin section */}
-            {isAdmin && (
-              <>
-                <div className='h-6 border-l border-indigo-200'></div>
-                <div className='flex items-center'>
-                  <Badge className='mr-2 bg-indigo-600'>Admin</Badge>
-                  {adminNavItems.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={`flex items-center space-x-1 ml-4 relative ${
-                        isActive(item.href)
-                          ? 'text-indigo-700 font-medium'
-                          : 'text-gray-600 hover:text-indigo-600'
-                      }`}
-                    >
-                      <item.icon className='h-4 w-4' />
-                      <span>{item.label}</span>
-                      {isActive(item.href) && (
-                        <div className='absolute h-0.5 w-full bg-indigo-600 bottom-[-12px] left-0'></div>
-                      )}
-                    </Link>
-                  ))}
-                </div>
-              </>
-            )}
           </nav>
           <Button
             variant='outline'
