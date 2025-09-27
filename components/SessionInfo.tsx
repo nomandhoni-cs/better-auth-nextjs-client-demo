@@ -1,12 +1,12 @@
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 
-export default async function SessionInfo() {
-    const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString(); // Get all cookies as a string
+export default async function PrivateLayout() {
+    const incomingHeaders = await headers(); // Add await here
+    const cookie = incomingHeaders.get("cookie");
 
     const res = await fetch("https://auth0.peermed.de/api/auth/get-session", {
         credentials: "include",
-        headers: cookieHeader ? { cookie: cookieHeader } : {},
+        headers: cookie ? { cookie } : {},
         cache: "no-store",
     });
 
