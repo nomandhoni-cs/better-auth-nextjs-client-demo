@@ -30,7 +30,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <main>
-          <SessionInfo />
           {/* <Headers /> */}
           {/* <Session /> */}
           {children}</main>
@@ -45,6 +44,7 @@ export default function RootLayout({
           position='bottom-center'
           richColors
         />
+        <SessionInfo />
       </body>
     </html>
   )

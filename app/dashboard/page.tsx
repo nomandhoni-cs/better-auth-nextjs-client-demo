@@ -26,7 +26,7 @@ export default function Dashboard() {
         Welcome back, {data?.user.name}!
       </h1>
 
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+      {/* <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
         <Card className='border-indigo-200'>
           <CardHeader>
             <CardTitle className='text-indigo-700 flex items-center'>
@@ -60,38 +60,37 @@ export default function Dashboard() {
               </p>
               <p className='text-sm text-gray-600'>
                 <span className='font-medium'>Member since:</span>{' '}
-                {/* {user?.createdAt} */}
+                {user?.createdAt}
               </p>
-              {/* <Link href='/dashboard/profile' className='w-full block'>
+              <Link href='/dashboard/profile' className='w-full block'>
                 <Button
                   variant='outline'
                   className='mt-4 w-full border-indigo-200 text-indigo-700 hover:bg-indigo-50'
                 >
                   View Profile
                 </Button>
-              </Link> */}
+              </Link>
             </div>
           </CardContent>
         </Card>
-        <JwtDemoPage />
-        {/* <Card className='border-indigo-200'>
+        <Card className='border-indigo-200'>
           <CardHeader>
-            <CardTitle className='text-indigo-700 flex items-center'>
-              <Settings className='mr-2 h-5 w-5' />
-              Account Settings
-            </CardTitle>
-            <CardDescription>Manage your account preferences</CardDescription>
+          <CardTitle className='text-indigo-700 flex items-center'>
+          <Settings className='mr-2 h-5 w-5' />
+          Account Settings
+          </CardTitle>
+          <CardDescription>Manage your account preferences</CardDescription>
           </CardHeader>
           <CardContent>
             <div className='space-y-4'>
               <Link href='/dashboard/change-password' className='w-full block'>
                 <Button
-                  variant='outline'
+                variant='outline'
                   className='w-full justify-start border-indigo-200 text-gray-700 hover:bg-indigo-50'
                 >
                   Change Password
                 </Button>
-              </Link>
+                </Link>
               <Button
                 variant='outline'
                 className='w-full justify-start border-indigo-200 text-gray-700 hover:bg-indigo-50'
@@ -104,46 +103,47 @@ export default function Dashboard() {
               >
                 Privacy Settings
               </Button>
-            </div>
+              </div>
           </CardContent>
         </Card>
-
+        
         <Card className='border-indigo-200'>
-          <CardHeader>
-            <CardTitle className='text-indigo-700 flex items-center'>
+        <CardHeader>
+        <CardTitle className='text-indigo-700 flex items-center'>
               <Bell className='mr-2 h-5 w-5' />
               Notifications
             </CardTitle>
             <CardDescription>Recent activity and alerts</CardDescription>
-          </CardHeader>
-          <CardContent>
+            </CardHeader>
+            <CardContent>
             <div className='space-y-4'>
-              <div className='p-3 bg-indigo-50 rounded-md border border-indigo-100'>
-                <p className='text-sm font-medium text-indigo-700'>
-                  Welcome to Better Auth!
+            <div className='p-3 bg-indigo-50 rounded-md border border-indigo-100'>
+            <p className='text-sm font-medium text-indigo-700'>
+            Welcome to Better Auth!
+            </p>
+            <p className='text-xs text-gray-600 mt-1'>
+            Thank you for joining our platform.
                 </p>
-                <p className='text-xs text-gray-600 mt-1'>
-                  Thank you for joining our platform.
-                </p>
-              </div>
+                </div>
               <div className='p-3 bg-gray-50 rounded-md border border-gray-100'>
                 <p className='text-sm font-medium text-gray-700'>
                   Profile created successfully
-                </p>
-                <p className='text-xs text-gray-600 mt-1'>
+                  </p>
+                  <p className='text-xs text-gray-600 mt-1'>
                   Your profile has been set up.
-                </p>
-              </div>
-              <Button
-                variant='outline'
+                  </p>
+                  </div>
+                  <Button
+                  variant='outline'
                 className='w-full border-indigo-200 text-indigo-700 hover:bg-indigo-50'
-              >
+                >
                 View All Notifications
               </Button>
             </div>
-          </CardContent>
-        </Card> */}
-      </div>
+            </CardContent>
+            </Card>
+      </div> */}
+      <JwtDemoPage />
     </>
   )
 }
