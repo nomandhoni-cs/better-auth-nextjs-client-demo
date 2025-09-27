@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { toast } from 'sonner'
 import { useForm } from 'react-hook-form'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, Flower, Loader2, Github, Wand2 } from 'lucide-react'
+import { ArrowLeft, Flower, Loader2, Github } from 'lucide-react'
 //
 import { Button } from '~/components/ui/button'
 import {
@@ -25,7 +25,6 @@ import {
   FormLabel,
   FormMessage,
 } from '~/components/ui/form'
-import { Checkbox } from '~/components/ui/checkbox'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Separator } from '~/components/ui/separator'
 import { authClient } from '~/lib/auth'
@@ -84,35 +83,6 @@ function LoginForm() {
     })
   }
 
-  const onMagicLinkSubmit = async (data: MagicLinkFormValues) => {
-    try {
-      await authClient.signIn.magicLink(
-        {
-          email: data.email,
-          callbackURL: `${window.location.origin}${callbackUrl}`,
-        },
-        {
-          onSuccess: () => {
-            setIsMagicLinkSent(true)
-            toast.success('Magic link sent', {
-              description: 'Check your email for a login link.',
-            })
-          },
-          onError: ({ error }) => {
-            toast.error('Failed to send magic link', {
-              description:
-                error.message || 'There was a problem sending the magic link',
-            })
-          },
-        }
-      )
-    } catch (error) {
-      toast.error('Failed to send magic link', {
-        description:
-          'There was a problem sending the magic link. Please try again.',
-      })
-    }
-  }
 
   // Handle GitHub login
   const handleGithubLogin = async () => {
@@ -124,6 +94,7 @@ function LoginForm() {
       },
       {
         onError: ({ error }) => {
+          console.log(error)
           toast.error('GitHub login failed', {
             description: 'Could not authenticate with GitHub.',
           })
@@ -144,6 +115,7 @@ function LoginForm() {
       },
       {
         onError: ({ error }) => {
+          console.log(error)
           toast.error('Google login failed', {
             description: 'Could not authenticate with Google.',
           })
@@ -315,93 +287,6 @@ function LoginForm() {
                     </Button>
                   </form>
                 </Form>
-              </TabsContent>
-
-              <TabsContent value='magic-link' className='mt-4'>
-                {!isMagicLinkSent ? (
-                  <Form {...magicLinkForm}>
-                    <form
-                      onSubmit={magicLinkForm.handleSubmit(onMagicLinkSubmit)}
-                      className='space-y-4'
-                    >
-                      <div className='bg-indigo-50 p-3 rounded-md mb-4 text-sm text-indigo-700 border border-indigo-100'>
-                        <p>
-                          We'll send you a magic link to your email. Click the
-                          link to login without a password.
-                        </p>
-                      </div>
-                      <FormField
-                        control={magicLinkForm.control}
-                        name='email'
-                        rules={{
-                          required: 'Email is required',
-                          pattern: {
-                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                            message: 'Invalid email address',
-                          },
-                        }}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input
-                                type='email'
-                                placeholder='name@example.com'
-                                {...field}
-                                className='border-indigo-200 focus-visible:ring-indigo-500'
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <Button
-                        type='submit'
-                        className='w-full bg-indigo-600 hover:bg-indigo-700'
-                        disabled={isMagicLinkSubmitting}
-                      >
-                        {isMagicLinkSubmitting ? (
-                          <>
-                            <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                            Sending magic link...
-                          </>
-                        ) : (
-                          <>
-                            <Wand2 className='mr-2 h-4 w-4' />
-                            Send Magic Link
-                          </>
-                        )}
-                      </Button>
-                    </form>
-                  </Form>
-                ) : (
-                  <div className='space-y-4'>
-                    <div className='bg-green-50 p-4 rounded-md border border-green-100 text-green-700'>
-                      <h3 className='font-medium text-green-800 mb-1'>
-                        Magic link sent!
-                      </h3>
-                      <p className='text-sm'>
-                        We've sent a magic link to your email. Check your inbox
-                        and click the link to login instantly.
-                      </p>
-                    </div>
-                    <div className='text-sm text-gray-500'>
-                      <p>
-                        Didn't receive the email? Check your spam folder or try
-                        again in a few minutes.
-                      </p>
-                    </div>
-                    <Button
-                      type='button'
-                      variant='outline'
-                      className='w-full border-indigo-200'
-                      onClick={() => setIsMagicLinkSent(false)}
-                    >
-                      Try Again
-                    </Button>
-                  </div>
-                )}
               </TabsContent>
             </Tabs>
           </div>

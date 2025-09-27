@@ -21,7 +21,6 @@ export default function Home() {
   const [isGithubLoading, setIsGithubLoading] = React.useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = React.useState(false)
 
-  const router = useRouter()
   const { data: session } = useSession()
 
   const handleGithubLogin = async () => {
@@ -33,6 +32,7 @@ export default function Home() {
       },
       {
         onError: ({ error }) => {
+          console.log(error)
           toast.error('GitHub login failed', {
             description: 'Could not authenticate with GitHub.',
           })
@@ -52,6 +52,7 @@ export default function Home() {
       },
       {
         onError: ({ error }) => {
+          console.log(error)
           toast.error('Google login failed', {
             description: 'Could not authenticate with Google.',
           })
