@@ -12,7 +12,6 @@ import {
 import { User, Settings, Bell } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { useSession } from '~/lib/auth'
-import SessionInfo from '~/components/SessionInfo'
 
 export default function Dashboard() {
   const { data } = useSession()
@@ -22,7 +21,6 @@ export default function Dashboard() {
 
   return (
     <>
-      <SessionInfo />
       <h1 className='text-2xl font-bold text-gray-800 mb-6'>
         Welcome back, {data?.user.name}!
       </h1>

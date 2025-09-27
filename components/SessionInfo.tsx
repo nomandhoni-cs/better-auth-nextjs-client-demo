@@ -17,7 +17,7 @@ export default async function SessionInfo() {
         }
     }
 
-    const authServerUrl = process.env.NEXT_PUBLIC_API_URL!;
+    const authServerUrl = "https://auth0.peermed.de"
     const session = await getSession(authServerUrl);
 
     if (!session) {
