@@ -1,38 +1,27 @@
-import { headers } from "next/headers";
+import { cookies } from "next/headers";
 
-// This must be a Server Component (no "use client")
 export default async function SessionInfo() {
-    async function getSession(authServerUrl: string) {
-        const res = await fetch(`${authServerUrl}/api/auth/get-session`, {
-            credentials: "include",
-            headers: await headers(),
-        });
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore.toString(); // Get all cookies as a string
 
-        if (!res.ok) return null;
+    const res = await fetch("https://auth0.peermed.de/api/auth/get-session", {
+        credentials: "include",
+        headers: cookieHeader ? { cookie: cookieHeader } : {},
+        cache: "no-store",
+    });
 
-        try {
-            return await res.json();
-        } catch {
-            return null;
-        }
-    }
-
-    const authServerUrl = "https://auth0.peermed.de"
-    const session = await getSession(authServerUrl);
-
-    if (!session) {
-        return (
-            <div className="p-4 rounded-2xl shadow-md bg-red-50 text-red-700">
-                <p>No active session</p>
-            </div>
-        );
+    let sessionData
+    try {
+        sessionData = await res.json();
+    } catch {
+        // ignore parse errors, session stays null
     }
 
     return (
-        <div className="p-6 rounded-2xl shadow-lg bg-green-50 text-green-800 space-y-2">
-            <h2 className="text-xl font-semibold">Active Session</h2>
-            <pre className="text-sm bg-white p-3 rounded-xl overflow-x-auto border">
-                {JSON.stringify(session, null, 2)}
+        <div>
+            {/* Debug: show session data (optional, can remove later) */}
+            <pre className="mt-4 p-2 bg-gray-100 rounded text-sm">
+                {JSON.stringify(sessionData, null, 2)}
             </pre>
         </div>
     );
